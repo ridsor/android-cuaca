@@ -11,19 +11,24 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import {location, weather} from '../../assets';
 import WeatherItem from '../../components/Home/WeatherItem';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 const widthScreen = Dimensions.get('screen').width;
 
-export default function index() {
+interface Props {
+  navigation: NativeStackNavigationProp<{Search: undefined}>;
+}
+
+export default function Home({navigation}: Props) {
   const separator = () => {
-    return <View style={styles.mx7}></View>;
+    return <View style={styles.mx7} />;
   };
 
   return (
     <LinearGradient colors={['#646EE9', '#704BF1']} style={styles.body}>
       <ScrollView style={styles.container}>
         <Text style={styles.defaultFont}>Today, 3 May 2023</Text>
-        <TouchableWithoutFeedback onPress={() => {}}>
+        <TouchableWithoutFeedback onPress={() => navigation.navigate('Search')}>
           <View style={styles.wrapperLocation}>
             <Image source={location} style={styles.location} />
             <Text style={[styles.defaultFont, styles.fontLocation]}>
@@ -38,7 +43,7 @@ export default function index() {
             <View style={styles.informationWrapper}>
               <View>
                 <Text style={[styles.defaultFont, styles.informationLabel]}>
-                  Wind
+                  Angin
                 </Text>
                 <Text style={[styles.defaultFont, styles.informationValue]}>
                   342
@@ -46,7 +51,7 @@ export default function index() {
               </View>
               <View>
                 <Text style={[styles.defaultFont, styles.informationLabel]}>
-                  Humidt
+                  Kelembapan
                 </Text>
                 <Text style={[styles.defaultFont, styles.informationValue]}>
                   25%
@@ -123,7 +128,7 @@ const styles = StyleSheet.create({
   },
   weatherWrapper2: {
     flexDirection: 'row',
-    columnGap: widthScreen >= 300 ? 35 : 15,
+    columnGap: widthScreen >= 300 ? 30 : 15,
   },
   informationLabel: {
     fontSize: 18,
