@@ -9,12 +9,36 @@ interface Props {
 export default function WeatherItem(props: Props) {
   return (
     <View style={styles.background}>
-      <View style={styles.timeWrapper}>
+      <View style={styles.infoWrapper1}>
         <Image source={weather} style={styles.icon} />
         <View>
-          <Text style={[styles.defaultFont, styles.informationLabel]}>
+          <Text
+            style={[styles.defaultFont, styles.informationLabel, styles.mb4]}>
             {props.data.item.when}
           </Text>
+          <Text style={[styles.defaultFont, styles.informationLabel]}>
+            Berawan
+          </Text>
+        </View>
+      </View>
+      <View style={styles.infoWrapper2}>
+        <View>
+          <Text style={[styles.defaultFont, styles.informationLabel]}>
+            Angin
+          </Text>
+          <Text style={[styles.defaultFont, styles.infoValue]}>365</Text>
+        </View>
+        <View>
+          <Text style={[styles.defaultFont, styles.informationLabel]}>
+            Suhu
+          </Text>
+          <Text style={[styles.defaultFont, styles.infoValue]}>18°C</Text>
+        </View>
+        <View>
+          <Text style={[styles.defaultFont, styles.informationLabel]}>
+            Kelembapan
+          </Text>
+          <Text style={[styles.defaultFont, styles.infoValue]}>365</Text>
         </View>
       </View>
     </View>
@@ -23,7 +47,6 @@ export default function WeatherItem(props: Props) {
 
 const styles = StyleSheet.create({
   background: {
-    width: 180,
     backgroundColor: '#6530BC',
     flexShrink: 0,
     padding: 16,
@@ -42,8 +65,20 @@ const styles = StyleSheet.create({
   informationLabel: {
     fontWeight: '600',
   },
-  timeWrapper: {
+  mb4: {
+    marginBottom: 4,
+  },
+  infoWrapper1: {
     flexDirection: 'row',
     gap: 14,
+    marginBottom: 18,
+  },
+  infoWrapper2: {
+    flexDirection: 'row',
+    gap: 11,
+  },
+  infoValue: {
+    fontWeight: '600',
+    fontSize: 16,
   },
 });
