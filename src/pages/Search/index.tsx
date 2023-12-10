@@ -5,13 +5,53 @@ import SearchItem from '../../components/Home/SearchItem';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 interface Props {
-  navigation: NativeStackNavigationProp<{Home: undefined}>;
+  navigation: NativeStackNavigationProp<{Home: HomeParam}>;
 }
+
+type HomeParam = {
+  id: string;
+  today: string;
+  location: string;
+  temp: number;
+  wind: number;
+  humidity: number;
+  yesterday: {
+    id: string;
+    temp: number;
+    wind: number;
+    humidity: number;
+  };
+  tomorrow: {
+    id: string;
+    temp: number;
+    wind: number;
+    humidity: number;
+  };
+};
 
 export default function Search(props: Props) {
   const handleSetLocation = useCallback(
     (id: string) => {
-      props.navigation.navigate('Home');
+      props.navigation.navigate('Home', {
+        id: '',
+        today: '',
+        location: 'Ambon',
+        temp: 0,
+        wind: 0,
+        humidity: 0,
+        yesterday: {
+          id: '',
+          temp: 0,
+          wind: 0,
+          humidity: 0,
+        },
+        tomorrow: {
+          id: '',
+          temp: 0,
+          wind: 0,
+          humidity: 0,
+        },
+      });
     },
     [props.navigation],
   );
