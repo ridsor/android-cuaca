@@ -1,38 +1,69 @@
 import {Image, ListRenderItemInfo, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-import {weather} from '../../assets';
+import {icon_weather} from '../../assets';
+import {convertionFahrenheit} from '../../helper/Weather';
 
 interface Props {
-  data: ListRenderItemInfo<{id: string; when: string}>;
+  data: ListRenderItemInfo<Weather>;
+}
+
+interface Weather {
+  Temperature: {
+    Minimum: {
+      Value: number;
+    };
+    Maximum: {
+      Value: number;
+    };
+  };
+  Date: string;
+  Day: {
+    ShortPhrase: string;
+    Wind: {
+      Speed: {
+        Value: number;
+        Unit: string;
+      };
+    };
+  };
 }
 
 export default function WeatherItem(props: Props) {
   return (
     <View style={styles.background}>
       <View style={styles.infoWrapper1}>
-        <Image source={weather} style={styles.icon} />
+        <Image source={icon_weather} style={styles.icon} />
         <View>
           <Text
             style={[styles.defaultFont, styles.informationLabel, styles.mb4]}>
-            {props.data.item.when}
+            {'Hari ini'}
           </Text>
           <Text style={[styles.defaultFont, styles.informationLabel]}>
-            Berawan
+            {props.data.item.Day.ShortPhrase}
           </Text>
         </View>
       </View>
       <View style={styles.infoWrapper2}>
         <View>
           <Text style={[styles.defaultFont, styles.informationLabel]}>
-            Angin
+            Suhu
           </Text>
-          <Text style={[styles.defaultFont, styles.infoValue]}>365</Text>
+          <Text style={[styles.defaultFont, styles.infoValue]}>
+            {convertionFahrenheit(props.data.item.Temperature.Minimum.Value)}
+            °C /{' '}
+            {convertionFahrenheit(props.data.item.Temperature.Maximum.Value)}
+            °C
+          </Text>
         </View>
         <View>
           <Text style={[styles.defaultFont, styles.informationLabel]}>
-            Suhu
+            Angin
           </Text>
-          <Text style={[styles.defaultFont, styles.infoValue]}>18°C</Text>
+          <Text style={[styles.defaultFont, styles.infoValue]}>
+            {props.data.item.Day.Wind.Speed.Value +
+              ' ' +
+              props.data.item.Day.Wind.Speed.Unit}
+          </Text>
         </View>
         <View>
           <Text style={[styles.defaultFont, styles.informationLabel]}>
@@ -75,7 +106,7 @@ const styles = StyleSheet.create({
   },
   infoWrapper2: {
     flexDirection: 'row',
-    gap: 11,
+    gap: 14,
   },
   infoValue: {
     fontWeight: '600',
