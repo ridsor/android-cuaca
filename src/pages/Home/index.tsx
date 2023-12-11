@@ -10,11 +10,15 @@ import {
   View,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {location, weather} from '../../assets';
+import {icon_location, icon_weather} from '../../assets';
 import WeatherItem from '../../components/Home/WeatherItem';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import * as React from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  convertionDate,
+  convertionFahrenheit,
+  getWeather,
+} from '../../helper/Weather';
 
 const widthScreen = Dimensions.get('screen').width;
 
@@ -23,76 +27,45 @@ interface Props {
   route: any;
 }
 
-type HomeParam = {
-  id: string;
-  today: string;
-  location: string;
-  temp: number;
-  wind: number;
-  humidity: number;
-  yesterday: {
-    id: string;
-    temp: number;
-    wind: number;
-    humidity: number;
+interface Weather {
+  Temperature: {
+    Minimum: {
+      Value: number;
+    };
+    Maximum: {
+      Value: number;
+    };
   };
-  tomorrow: {
-    id: string;
-    temp: number;
-    wind: number;
-    humidity: number;
+  Date: string;
+  Day: {
+    ShortPhrase: string;
+    Wind: {
+      Speed: {
+        Value: number;
+        Unit: string;
+      };
+    };
   };
-};
+}
 
 export default function Home({navigation, route}: Props) {
   const [isLoading, setLoading] = React.useState<boolean>(true);
-  const [dataWeather, setDataWeather] = React.useState<HomeParam | undefined>();
+  const [location, setLocation] = React.useState<string>('');
+  const [weather, setWeather] = React.useState<Weather[]>([]);
 
   const separator = () => {
     return <View style={styles.mx7} />;
   };
 
   React.useEffect(() => {
-    async function getWeather() {
-      try {
-        let result = await AsyncStorage.getItem('weather');
-        if (!result) {
-          const value = {
-            id: '1',
-            today: '',
-            location: 'Wayame',
-            temp: 1,
-            wind: 1,
-            humidity: 1,
-            yesterday: {
-              id: '2',
-              temp: 1,
-              wind: 1,
-              humidity: 1,
-            },
-            tomorrow: {
-              id: '3',
-              temp: 1,
-              wind: 1,
-              humidity: 1,
-            },
-          };
-          await AsyncStorage.setItem('weather', JSON.stringify(value));
-          result = await AsyncStorage.getItem('weather');
-        }
-        return JSON.parse(result as string);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
     if (!route.params) {
       getWeather().then(res => {
-        setDataWeather(res);
+        setLocation(res?.location as string);
+        setWeather(res?.data);
         setLoading(false);
       });
     } else {
-      setDataWeather(route.params);
+      setWeather(route.params);
     }
   }, [route.params]);
 
@@ -104,27 +77,35 @@ export default function Home({navigation, route}: Props) {
         </View>
       ) : (
         <ScrollView style={styles.container}>
-          <Text style={styles.defaultFont}>Today, 3 May 2023</Text>
+          <Text style={styles.defaultFont}>
+            {convertionDate(weather[0].Date)}
+          </Text>
           <TouchableWithoutFeedback
             onPress={() => navigation.navigate('Search')}>
             <View style={styles.wrapperLocation}>
-              <Image source={location} style={styles.location} />
+              <Image source={icon_location} style={styles.location} />
               <Text style={[styles.defaultFont, styles.fontLocation]}>
-                {dataWeather?.location}
+                {location}
               </Text>
             </View>
           </TouchableWithoutFeedback>
           <View style={styles.weatherWrapper1}>
-            <Text style={[styles.defaultFont, styles.temp]}>18°C</Text>
+            <Text style={[styles.defaultFont, styles.temp]}>
+              {convertionFahrenheit(weather[0].Temperature.Minimum.Value)}
+              °C / {convertionFahrenheit(weather[0].Temperature.Maximum.Value)}
+              °C
+            </Text>
             <View style={styles.weatherWrapper2}>
-              <Image source={weather} style={styles.weather} />
+              <Image source={icon_weather} style={styles.weather} />
               <View style={styles.informationWrapper}>
                 <View>
                   <Text style={[styles.defaultFont, styles.informationLabel]}>
                     Angin
                   </Text>
                   <Text style={[styles.defaultFont, styles.informationValue]}>
-                    342
+                    {weather[0].Day.Wind.Speed.Value +
+                      ' ' +
+                      weather[0].Day.Wind.Speed.Unit}
                   </Text>
                 </View>
                 <View>
@@ -140,14 +121,9 @@ export default function Home({navigation, route}: Props) {
           </View>
           <FlatList
             ItemSeparatorComponent={separator}
-            data={[
-              {id: '1', when: 'kemarin'},
-              {id: '2', when: 'hari ini'},
-              {id: '3', when: 'besok'},
-            ]}
+            data={weather.filter((x, i) => i !== 0)}
             horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={item => item.id}
+            showsHorizontalScrollIndicator={true}
             renderItem={data => <WeatherItem data={data} />}
           />
         </ScrollView>
@@ -195,7 +171,8 @@ const styles = StyleSheet.create({
   },
   temp: {
     fontWeight: '700',
-    fontSize: 64,
+    fontSize: 44,
+    marginBottom: 16,
   },
   weather: {
     width: 190,
@@ -203,12 +180,11 @@ const styles = StyleSheet.create({
     objectFit: 'cover',
   },
   weatherWrapper1: {
-    paddingHorizontal: 15,
     marginBottom: 50,
   },
   weatherWrapper2: {
     flexDirection: 'row',
-    columnGap: widthScreen >= 300 ? 30 : 15,
+    columnGap: widthScreen >= 300 ? 15 : 10,
   },
   informationLabel: {
     fontSize: 18,
