@@ -1,4 +1,4 @@
-import location from './location.png';
-import weather from './weather.png';
+import icon_location from './icon_location.png';
+import icon_weather from './icon_weather.png';
 
-export {location, weather};
+export {icon_location, icon_weather};
