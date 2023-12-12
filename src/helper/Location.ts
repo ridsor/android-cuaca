@@ -48,7 +48,6 @@ export const getCurrentPosition = (): Promise<{
     });
   });
 };
-
 export const getCurrentLocation = async () => {
   try {
     let location = await AsyncStorage.getItem('location');
