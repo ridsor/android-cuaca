@@ -1,6 +1,5 @@
 import {
   ActivityIndicator,
-  Dimensions,
   FlatList,
   Image,
   ScrollView,
@@ -15,12 +14,11 @@ import WeatherItem from '../../components/Home/WeatherItem';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import * as React from 'react';
 import {
-  convertionDate,
+  dateConvertion,
   convertionFahrenheit,
   getWeather,
 } from '../../helper/Weather';
-
-const widthScreen = Dimensions.get('screen').width;
+import {getCurrentLocation} from '../../helper/Location';
 
 interface Props {
   navigation: NativeStackNavigationProp<{Search: undefined}>;
@@ -45,12 +43,30 @@ interface Weather {
         Unit: string;
       };
     };
+    SolarIrradiance: {
+      Value: number;
+      Unit: string;
+    };
+  };
+}
+
+interface Location {
+  Key: string;
+  LocalizedName: string;
+  Country: {
+    LocalizedName: string;
+  };
+  Region: {
+    LocalizedName: string;
+  };
+  AdministrativeArea: {
+    LocalizedName: string;
   };
 }
 
 export default function Home({navigation, route}: Props) {
   const [isLoading, setLoading] = React.useState<boolean>(true);
-  const [location, setLocation] = React.useState<string>('');
+  const [location, setLocation] = React.useState<Location>();
   const [weather, setWeather] = React.useState<Weather[]>([]);
 
   const separator = () => {
@@ -58,14 +74,19 @@ export default function Home({navigation, route}: Props) {
   };
 
   React.useEffect(() => {
+    const load = async () => {
+      const currentLocation = await getCurrentLocation();
+      const currentWeather = await getWeather(currentLocation?.Key as string);
+      setWeather(currentWeather);
+      setLocation(currentLocation);
+      setLoading(false);
+    };
+
     if (!route.params) {
-      getWeather().then(res => {
-        setLocation(res?.location as string);
-        setWeather(res?.data);
-        setLoading(false);
-      });
+      load();
     } else {
-      setWeather(route.params);
+      setWeather(route.params.weather);
+      setLocation(route.params.location);
     }
   }, [route.params]);
 
@@ -78,14 +99,20 @@ export default function Home({navigation, route}: Props) {
       ) : (
         <ScrollView style={styles.container}>
           <Text style={styles.defaultFont}>
-            {convertionDate(weather[0].Date)}
+            {dateConvertion(weather[0].Date)}
           </Text>
           <TouchableWithoutFeedback
             onPress={() => navigation.navigate('Search')}>
             <View style={styles.wrapperLocation}>
               <Image source={icon_location} style={styles.location} />
               <Text style={[styles.defaultFont, styles.fontLocation]}>
-                {location}
+                {location?.LocalizedName +
+                  ', ' +
+                  location?.AdministrativeArea.LocalizedName +
+                  ', ' +
+                  location?.Country.LocalizedName +
+                  ', ' +
+                  location?.Region.LocalizedName}
               </Text>
             </View>
           </TouchableWithoutFeedback>
@@ -110,10 +137,12 @@ export default function Home({navigation, route}: Props) {
                 </View>
                 <View>
                   <Text style={[styles.defaultFont, styles.informationLabel]}>
-                    Kelembapan
+                    Penyinaran Matahari
                   </Text>
                   <Text style={[styles.defaultFont, styles.informationValue]}>
-                    25%
+                    {weather[0].Day.SolarIrradiance.Value +
+                      ' ' +
+                      weather[0].Day.SolarIrradiance.Unit}
                   </Text>
                 </View>
               </View>
@@ -121,7 +150,7 @@ export default function Home({navigation, route}: Props) {
           </View>
           <FlatList
             ItemSeparatorComponent={separator}
-            data={weather.filter((x, i) => i !== 0)}
+            data={weather}
             horizontal
             showsHorizontalScrollIndicator={true}
             renderItem={data => <WeatherItem data={data} />}
@@ -181,10 +210,10 @@ const styles = StyleSheet.create({
   },
   weatherWrapper1: {
     marginBottom: 50,
+    alignItems: 'center',
   },
   weatherWrapper2: {
-    flexDirection: 'row',
-    columnGap: widthScreen >= 300 ? 15 : 10,
+    columnGap: 15,
   },
   informationLabel: {
     fontSize: 18,

@@ -6,15 +6,35 @@ import {
 } from 'react-native';
 
 interface Props {
-  data: ListRenderItemInfo<{id: string; location: string}>;
-  onSetLocation: (id: string) => void;
+  data: ListRenderItemInfo<Location>;
+  onSetLocation: (location: Location) => void;
+}
+
+interface Location {
+  Key: string;
+  LocalizedName: string;
+  Country: {
+    LocalizedName: string;
+  };
+  Region: {
+    LocalizedName: string;
+  };
+  AdministrativeArea: {
+    LocalizedName: string;
+  };
 }
 
 export default function SearchItem(props: Props) {
   return (
-    <TouchableOpacity onPress={() => props.onSetLocation(props.data.item.id)}>
+    <TouchableOpacity onPress={() => props.onSetLocation(props.data.item)}>
       <Text style={[styles.defaultFont, styles.searchValue]}>
-        {props.data.item.location}
+        {props.data.item.LocalizedName +
+          ', ' +
+          props.data.item.AdministrativeArea.LocalizedName +
+          ', ' +
+          props.data.item.Country.LocalizedName +
+          ', ' +
+          props.data.item.Region.LocalizedName}
       </Text>
     </TouchableOpacity>
   );
