@@ -1,7 +1,10 @@
 import {Image, ListRenderItemInfo, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {icon_weather} from '../../assets';
-import {convertionFahrenheit} from '../../helper/Weather';
+import {
+  dateDescriptionConverstion,
+  convertionFahrenheit,
+} from '../../helper/Weather';
 
 interface Props {
   data: ListRenderItemInfo<Weather>;
@@ -25,6 +28,10 @@ interface Weather {
         Unit: string;
       };
     };
+    SolarIrradiance: {
+      Value: number;
+      Unit: string;
+    };
   };
 }
 
@@ -36,7 +43,7 @@ export default function WeatherItem(props: Props) {
         <View>
           <Text
             style={[styles.defaultFont, styles.informationLabel, styles.mb4]}>
-            {'Hari ini'}
+            {dateDescriptionConverstion(props.data.item.Date)}
           </Text>
           <Text style={[styles.defaultFont, styles.informationLabel]}>
             {props.data.item.Day.ShortPhrase}
@@ -67,9 +74,13 @@ export default function WeatherItem(props: Props) {
         </View>
         <View>
           <Text style={[styles.defaultFont, styles.informationLabel]}>
-            Kelembapan
+            Penyinaran Matahari
           </Text>
-          <Text style={[styles.defaultFont, styles.infoValue]}>365</Text>
+          <Text style={[styles.defaultFont, styles.infoValue]}>
+            {props.data.item.Day.SolarIrradiance.Value +
+              ' ' +
+              props.data.item.Day.SolarIrradiance.Unit}
+          </Text>
         </View>
       </View>
     </View>
