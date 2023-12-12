@@ -1,29 +1,10 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getLocation} from './Location';
-
-export const getWeather = async () => {
+export const getWeather = async (locationKey: string) => {
   try {
-    let locationKey = await AsyncStorage.getItem('locationKey');
-    let currentLocation = await AsyncStorage.getItem('currentLocation');
-    if (!locationKey || !currentLocation) {
-      const geolocation = await getLocation();
-      const location = await fetch(
-        `https://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey=2QIol6KLJHG5ceKDkpCGVtVkx9k1Imkk&q=${geolocation?.coords.latitude},${geolocation?.coords.longitude}`,
-      ).then(res => res.json());
-
-      await AsyncStorage.setItem('locationKey', location.Key);
-      await AsyncStorage.setItem('currentLocation', location.LocalizedName);
-      locationKey = await AsyncStorage.getItem('locationKey');
-    }
-
     const dataWeather = await fetch(
-      `https://dataservice.accuweather.com/forecasts/v1/daily/5day/${locationKey}?apikey=2QIol6KLJHG5ceKDkpCGVtVkx9k1Imkk&language=id-id&details=true`,
+      `https://dataservice.accuweather.com/forecasts/v1/daily/5day/${locationKey}?apikey=COjK0Fselq4JKAdsESjwsYrWRjygYGuG&language=id-id&details=true`,
     ).then(res => res.json());
 
-    return {
-      data: dataWeather.DailyForecasts,
-      location: currentLocation,
-    };
+    return dataWeather.DailyForecasts;
   } catch (e) {
     console.error(e);
   }
@@ -34,7 +15,7 @@ export const convertionFahrenheit = (weather: number) => {
   return Math.round(result);
 };
 
-export const convertionDate = (date: string) => {
+export const dateConvertion = (date: string) => {
   const result = new Date(date);
 
   return Intl.DateTimeFormat('id-ID', {
@@ -43,4 +24,19 @@ export const convertionDate = (date: string) => {
     day: 'numeric',
     weekday: 'short',
   }).format(result);
+};
+
+export const dateDescriptionConverstion = (date: string) => {
+  const target = new Date(date);
+  const today = new Date();
+  target.setUTCHours(0, 0, 0, 0);
+  today.setUTCHours(0, 0, 0, 0);
+
+  if (target.getTime() === today.getTime()) {
+    return 'Hari ini';
+  } else if (target.getTime() === today.getTime() + 1000 * 3600 * 24) {
+    return 'Besok';
+  } else {
+    return Intl.DateTimeFormat('id-ID', {weekday: 'long'}).format(target);
+  }
 };
